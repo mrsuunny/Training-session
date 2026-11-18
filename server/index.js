@@ -16,13 +16,18 @@ app.get('/api/places', (req, res) => {
 })
 
 app.post('/api/places', (req, res) => {
+	const { name, activity } = req.body;
+
+	if(typeof name !== "string" || name.trim() === ('') || typeof activity !== "string" || activity.trim() === ('')){
+		return res.status(400).json({message: "Please fill both Fields"})
+	}
 	const newPlaces = {
 		id: Date.now(),
-		name: req.body.name,
-		activity: req.body.activity
+		name: name.trim(),
+		activity: activity.trim(),
 	}
-	res.json(newPlaces)
 	places.push(newPlaces)
+	res.json(newPlaces)
 })
 
 app.delete('/api/places/:id', (req, res) => {

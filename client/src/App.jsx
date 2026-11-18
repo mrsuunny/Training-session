@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react'
-
 function App() {
 	const [places, setPlaces] = useState([])
 	const [name, setName] = useState('')
 	const [activity, setActivity] = useState('')
+	const [error, setError] = useState('')
 
 	useEffect(() => {
 		fetch('http://localhost:5000/api/places')
@@ -13,17 +13,23 @@ function App() {
 
 	const handleSubmit = (e) => {
 		e.preventDefault()
+		setError('')
 		fetch('http://localhost:5000/api/places', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({name, activity})
 		})
-			.then((res) => res.json())
-			.then((newPlace) => {
-				setPlaces([...places, newPlace])
+			.then((res) => res.json().then((data) => ({ok: res.ok, data})))
+			.then(({ok, data}) => {
+				if (!ok) {
+					setError(data.message)
+					return
+				}
+				setPlaces([...places, data])
 				setName('')
 				setActivity('')
 			})
+			.catch(() => setError('Server Fucked Up'))
 	}
 
 	const handleDelete = (id) => {
@@ -38,6 +44,7 @@ function App() {
 
 	return (
 		<>
+			{error && <p style={{ color: 'red' }}>{error}</p>}
 			<form onSubmit={handleSubmit}>
 				<input value={name} onChange={(e) => setName(e.target.value)} />
 				<input value={activity} onChange={(e) => setActivity(e.target.value)} />
