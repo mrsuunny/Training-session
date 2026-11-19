@@ -1,48 +1,8 @@
-const express = require('express')
-const cors = require('cors')
+require('dotenv').config()
+const app = require('./app')
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+const PORT = process.env.PORT || 5000
 
-const places = [
-	{id: 1, name: 'Skardu', activity: 'Mountain Climbing'},
-	{id: 2, name: 'Bali', activity: 'Surfing'},
-	{id: 3, name: 'Dubai', activity: 'Skydiving'}
-]
-
-app.get('/api/places', (req, res) => {
-	res.json(places)
-})
-
-app.post('/api/places', (req, res) => {
-	const { name, activity } = req.body;
-
-	if(typeof name !== "string" || name.trim() === ('') || typeof activity !== "string" || activity.trim() === ('')){
-		return res.status(400).json({message: "Please fill both Fields"})
-	}
-	const newPlaces = {
-		id: Date.now(),
-		name: name.trim(),
-		activity: activity.trim(),
-	}
-	places.push(newPlaces)
-	res.json(newPlaces)
-})
-
-app.delete('/api/places/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const index = places.findIndex((p) => p.id === id)
-
-    if (index === -1){
-        return res.status(404).json({ messsage : "Index not Found" })
-
-    }
-
-    places.splice(index, 1)
-    res.json({ message : "Deleted" })
-})
-
-app.listen(5000, () => {
-	console.log('Port is Listening at 5000')
+app.listen(PORT, () => {
+	console.log(`Port is Listening at ${PORT}`)
 })
