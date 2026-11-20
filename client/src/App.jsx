@@ -53,6 +53,7 @@ function App() {
 			</form>
 			<ul>
 				{places.map((place) => (
+					// new changes requires
 					<li key={place._id}>
 						{place.name} - {place.activity}
 						<button onClick={() => handleDelete(place._id)}>Delete</button>
