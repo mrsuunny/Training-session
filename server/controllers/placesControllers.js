@@ -1,38 +1,42 @@
-const places = [
-	{id: 1, name: 'Skardu', activity: 'Mountain Climbing'},
-	{id: 2, name: 'Bali', activity: 'Surfing'},
-	{id: 3, name: 'Dubai', activity: 'Skydiving'}
-]
+const mongoose = require('mongoose')
+const Place = require('../models/Place')
 
-const getPlaces = (req, res) => {
-	res.json(places)
+const getPlaces = async (req, res) => {
+	try {
+		const places = await Place.find()
+		res.json(places)
+	} catch (err) {
+		res.status(500).json({message: 'Server Error'})
+	}
 }
 
-const postPlace = (req, res) => {
-	const {name, activity} = req.body
+const postPlace = async (req, res) => {
+	try{
+		const {name, activity} = req.body
 
-	if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
-		return res.status(400).json({message: 'Please fill both Fields'})
+		if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
+			return res.status(400).json({message: 'Please fill both Fields'})
+		}
+		const newPlaces = await Place.create({ name: name.trim(), activity: activity.trim() })
+		res.status(201).json(newPlaces)
+	} catch (err) {
+		res.status(500).json({message: 'Server Error'})
 	}
-	const newPlaces = {
-		id: Date.now(),
-		name: name.trim(),
-		activity: activity.trim()
-	}
-	places.push(newPlaces)
-	res.json(newPlaces)
 }
 
-const deletePlace = (req, res) => {
-	const id = Number(req.params.id)
-	const index = places.findIndex((p) => p.id === id)
-
-	if (index === -1) {
-		return res.status(404).json({message: 'Place not Found'})
+const deletePlace = async (req, res) => {
+	try {
+		if (!mongoose.isValidObjectId(req.params.id)) {
+			return res.status(400).json({message: 'invalid ID'})
+		}
+		const deleted = await Place.findByIdAndDelete(req.params.id)
+		if (!deleted) {
+			return res.status(404).json({message: 'Place not Found'})
+		}
+		res.json({message: 'Deleted'})
+	} catch (err) {
+		res.status(500).json({message: 'Server Error'})
 	}
-
-	places.splice(index, 1)
-	res.json({message: 'Deleted'})
 }
 
 module.exports = {getPlaces, postPlace, deletePlace}

@@ -38,7 +38,7 @@ function App() {
 		})
 			.then((res) => res.json())
 			.then(() => {
-				setPlaces(places.filter((place) => place.id !== id))
+				setPlaces(places.filter((place) => place._id !== id))
 			})
 	}
 
@@ -52,9 +52,9 @@ function App() {
 			</form>
 			<ul>
 				{places.map((place) => (
-					<li key={place.id}>
+					<li key={place._id}>
 						{place.name} - {place.activity}
-						<button onClick={() => handleDelete(place.id)}>Delete</button>
+						<button onClick={() => handleDelete(place._id)}>Delete</button>
 					</li>
 				))}
 			</ul>
