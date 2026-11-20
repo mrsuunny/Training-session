@@ -4,6 +4,7 @@ function App() {
 	const [name, setName] = useState('')
 	const [activity, setActivity] = useState('')
 	const [error, setError] = useState('')
+	const [editingID, setEditingID] = useState(null)
 
 	useEffect(() => {
 		fetch('http://localhost:5000/api/places')

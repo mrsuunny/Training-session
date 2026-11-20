@@ -39,4 +39,33 @@ const deletePlace = async (req, res) => {
 	}
 }
 
-module.exports = {getPlaces, postPlace, deletePlace}
+const updatePlace = async (req, res) => {
+	try {
+		if (!mongoose.isValidObjectId(req.params.id)) {
+			return res.status(400).json({message: 'Invalid ID'})
+		}
+
+		const {name, activity} = req.body
+
+		if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
+			return res.status(400).json({message: 'Please fill both Fields'})
+		}
+
+		const updated = await Place.findByIdAndUpdate(
+			req.params.id,
+			{ name: name.trim(), activity: activity.trim() },
+			{ new: true, runValidators: true }
+		)
+
+		if(!updated) {
+			return res.status(404).json({message: 'User not Found'})
+		}
+
+		res.json(updated)
+
+	} catch (err) {
+		res.status(500).json({message: 'Server Error'})
+	}
+}
+
+module.exports = {getPlaces, postPlace, deletePlace, updatePlace}
