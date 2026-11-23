@@ -15,8 +15,12 @@ function App() {
 	const handleSubmit = (e) => {
 		e.preventDefault()
 		setError('')
-		fetch('http://localhost:5000/api/places', {
-			method: 'POST',
+
+		const isEditing = editingID !== null
+		const url = isEditing ? `http://localhost:5000/api/places/${editingID}` : `http://localhost:5000/api/places`
+
+		fetch(url, {
+			method: isEditing ? 'PUT' : 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({name, activity})
 		})
@@ -26,11 +30,16 @@ function App() {
 					setError(data.message)
 					return
 				}
-				setPlaces([...places, data])
+				if (isEditing) {
+					setPlaces(places.map((p) => (p._id === editingID ? data : p)))
+				} else {
+					setPlaces([...places, data])
+				}
+				setEditingID(null)
 				setName('')
 				setActivity('')
 			})
-			.catch(() => setError('Server Fucked Up'))
+			.catch(() => setError('Could Not Reach Server'))
 	}
 
 	const handleDelete = (id) => {
@@ -45,18 +54,25 @@ function App() {
 
 	return (
 		<>
-			{error && <p style={{ color: 'red' }}>{error}</p>}
+			{error && <p style={{color: 'red'}}>{error}</p>}
 			<form onSubmit={handleSubmit}>
 				<input value={name} onChange={(e) => setName(e.target.value)} />
 				<input value={activity} onChange={(e) => setActivity(e.target.value)} />
-				<button type="submit">Add</button>
+				<button type="submit">{editingID ? 'Update' : 'Add'}</button>
 			</form>
 			<ul>
 				{places.map((place) => (
-					// new changes requires
 					<li key={place._id}>
 						{place.name} - {place.activity}
 						<button onClick={() => handleDelete(place._id)}>Delete</button>
+						<button
+							onClick={() => {
+								setEditingID(place._id)
+								setName(place.name)
+								setActivity(place.activity)
+							}}>
+							Edit
+						</button>
 					</li>
 				))}
 			</ul>
