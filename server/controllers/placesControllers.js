@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Place = require('../models/Place')
 
 const getPlaces = async (req, res) => {
-	const places = await Place.find()
+	const places = await Place.find({user: req.user.id})
 	res.json(places)
 }
 
@@ -12,7 +12,7 @@ const postPlace = async (req, res) => {
 	if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
 		return res.status(400).json({message: 'Please fill both Fields'})
 	}
-	const newPlaces = await Place.create({name: name.trim(), activity: activity.trim()})
+	const newPlaces = await Place.create({ name: name.trim(), activity: activity.trim(), user: req.user.id })
 	res.status(201).json(newPlaces)
 }
 
@@ -20,7 +20,7 @@ const deletePlace = async (req, res) => {
 	if (!mongoose.isValidObjectId(req.params.id)) {
 		return res.status(400).json({message: 'Invalid ID'})
 	}
-	const deleted = await Place.findByIdAndDelete(req.params.id)
+	const deleted = await Place.findOneAndDelete({ _id: req.params.id, user: req.user.id })
 	if (!deleted) {
 		return res.status(404).json({message: 'Place not Found'})
 	}
@@ -38,7 +38,7 @@ const updatePlace = async (req, res) => {
 		return res.status(400).json({message: 'Please fill both Fields'})
 	}
 
-	const updated = await Place.findByIdAndUpdate(req.params.id, {name: name.trim(), activity: activity.trim()}, {new: true, runValidators: true})
+	const updated = await Place.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, {name: name.trim(), activity: activity.trim()}, {new: true, runValidators: true})
 
 	if (!updated) {
 		return res.status(404).json({message: 'Place not Found'})
