@@ -9,9 +9,6 @@ const getPlaces = async (req, res) => {
 const postPlace = async (req, res) => {
 	const {name, activity} = req.body
 
-	if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
-		return res.status(400).json({message: 'Please fill both Fields'})
-	}
 	const newPlaces = await Place.create({ name: name.trim(), activity: activity.trim(), user: req.user.id })
 	res.status(201).json(newPlaces)
 }
@@ -33,10 +30,6 @@ const updatePlace = async (req, res) => {
 	}
 
 	const {name, activity} = req.body
-
-	if (typeof name !== 'string' || name.trim() === '' || typeof activity !== 'string' || activity.trim() === '') {
-		return res.status(400).json({message: 'Please fill both Fields'})
-	}
 
 	const updated = await Place.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, {name: name.trim(), activity: activity.trim()}, {new: true, runValidators: true})
 
