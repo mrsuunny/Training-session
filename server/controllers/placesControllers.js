@@ -4,34 +4,8 @@ const Place = require('../models/Place')
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const getPlaces = async (req, res) => {
-	const page = Math.max(parseInt(req.query.page) || 1, 1)
-	const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 50)
-
-	const filter = { user: req.user.id }
-
-	if (typeof req.query.q === 'string' && req.query.q.trim() !== '') {
-		const search = mongoose.trusted({
-			$regex: escapeRegex(req.query.q.trim()),
-			$options: 'i'
-		})
-		filter.$or = [{ name: search }, { activity: search }]
-	}
-
-	const [places, total] = await Promise.all([
-		Place.find(filter)
-			.sort({ _id: -1 })
-			.skip((page - 1) * limit)
-			.limit(limit),
-		Place.countDocuments(filter)
-	])
-
-	res.json({
-		data: places,
-		page,
-		limit,
-		total,
-		totalPages: Math.ceil(total / limit)
-	})
+	const places = await Place.find({user: req.user.id})
+	res.json(places)
 }
 
 const postPlace = async (req, res) => {
